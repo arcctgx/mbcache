@@ -38,11 +38,12 @@ except KeyError:
 for medium in release["medium-list"]:
     for track in medium["track-list"]:
 
-        # take the length from the track listing, because
-        # it could be accurately set from Disc ID
-        length = int(track["length"])
-        m = length/1000/60  # FIXME round instead of truncating
-        s = length/1000%60  # FIXME round instead of truncating
+        # take the length in miliseconds from the track listing,
+        # because it could be accurately set from Disc ID
+        len_ms = float(track["length"])
+        len_sec = round(len_ms/1000, 0)
+        m = len_sec / 60
+        s = len_sec % 60
 
         recording = track["recording"]
 
@@ -53,4 +54,4 @@ for medium in release["medium-list"]:
         except KeyError:
             title = recording["title"]
 
-        print "%s\t%d:%02d (%d)\t%s" % (title, m, s, length, recording["id"])
+        print "%s\t%d:%02d\t%s" % (title, m, s, recording["id"])
