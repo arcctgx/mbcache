@@ -3,14 +3,15 @@
 import sys
 import argparse
 import musicbrainzngs
-import json
-import logging
+#import json
+#import logging
+import entities
 
 parser = argparse.ArgumentParser(description="Fetch album data from MusicBrainz")
 parser.add_argument("mbid", help="release MBID to fetch data for")
 args = parser.parse_args()
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 musicbrainzngs.set_useragent("mbcache", "v0.1.0a")
 
@@ -26,32 +27,44 @@ try:
 except KeyError:
     sys.exit("Query for MBID \"%s\" returned empty result!" % args.mbid)
 
-# get artist and MBID:
-# if multiple artists get "artist-credit-phrase", and use MBID of first artist (last.fm seems to be doing that)
-# TODO
+# use MBID of first artist even in case of multiple artists
+# (last.fm seems to be doing that)
+art = entities.Artist(
+    release["artist-credit-phrase"],
+    release["artist-credit"][0]["artist"]["id"]
+)
+print repr(art)
 
-# get release title:
-# we already have release MBID from command line
-# TODO
+rel = entities.Release(
+    release["title"],
+    release["id"]
+)
+print repr(rel)
 
 # get all track titles, lenghts and MBIDs:
+tracks = []
+
 for medium in release["medium-list"]:
     for track in medium["track-list"]:
 
-        # take the length in miliseconds from the track listing,
-        # because it could be accurately set from Disc ID
+        # prefer track length over recording length, because
+        # track length could be accurately set from Disc ID
         len_ms = float(track["length"])
         len_sec = round(len_ms/1000, 0)
         m = len_sec / 60
         s = len_sec % 60
-
-        recording = track["recording"]
 
         # prefer track title over recording title
         # (track title exists only if it is different from recording title)
         try:
             title = track["title"]
         except KeyError:
-            title = recording["title"]
+            title = track["recording"]["title"]
 
-        print "%s\t%d:%02d\t%s" % (title, m, s, recording["id"])
+        tr = entities.Track(
+            title,
+            track["recording"]["id"],
+            "%d:%02d" % (m,s)
+        )
+        tracks.append(tr)
+        print repr(tr)
