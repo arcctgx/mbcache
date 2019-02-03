@@ -44,3 +44,24 @@ class Release(object):
     def __repr__(self):
         s = '%s\t%s' % (self.title, self.mbid)
         return s.encode('utf-8')
+
+
+class Album(object):
+    """
+    MusicBrainz album entity.
+    attributes: artist, title, mbid, tracklist
+    """
+    def __init__(self, artist, release, tracklist):
+        self.artist = artist
+        self.release = release
+        self.tracklist = tracklist
+        self.title = release.title
+        self.mbid = release.mbid
+
+    def __repr__(self):
+        s = []
+        s.append(repr(self.artist))
+        s.append(repr(self.release))
+        for track in self.tracklist:
+            s.append(repr(track))
+        return '\n'.join(s)
