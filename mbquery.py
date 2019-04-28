@@ -48,10 +48,12 @@ def parse_release_data(release):
 
             # prefer track length over recording length, because
             # track length could be accurately set from Disc ID
-            len_ms = float(track["length"])
-            len_sec = round(len_ms/1000, 0)
-            m = len_sec / 60
-            s = len_sec % 60
+            try:
+                len_ms = float(track["length"])
+                len_sec = round(len_ms/1000, 0)
+                time = "%d:%02d" % (len_sec/60, len_sec%60)
+            except KeyError:
+                time = "0:00"
 
             # prefer track title over recording title
             # (track title exists only if it is different from recording title)
@@ -63,7 +65,7 @@ def parse_release_data(release):
             tr = entities.Track(
                 title,
                 track["recording"]["id"],
-                "%d:%02d" % (m,s)
+                time
             )
             tracks.append(tr)
 
