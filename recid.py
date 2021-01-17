@@ -2,9 +2,47 @@
 
 import argparse
 import json
-import musicbrainzngs as mb
 import logging
+import musicbrainzngs as mb
+import os
 import sys
+from xdg import BaseDirectory
+
+class Cache:
+    __cache_dir = BaseDirectory.save_cache_path('mbcache')
+    __cache_file = os.path.join(__cache_dir, 'recording_cache.json')
+    __cache = {}
+    __modified = False
+
+    def __init__(self):
+        try:
+            with open(self.__cache_file, 'r') as f:
+                self.__cache = json.load(f)
+            print('Loaded', len(self.__cache), 'entries from cache.')
+        except FileNotFoundError:
+            print('Cache file does not exist. Initializing empty cache.')
+
+    def __del__(self):
+        if self.__modified:
+            with open(self.__cache_file, 'w') as f:
+                json.dump(self.__cache, f, indent=2)
+
+    def __str__(self):
+        return json.dumps(self.__cache, indent=2)
+
+    @staticmethod
+    def __encode_key(artist, title, album):
+        return '\t'.join((artist, title, album)).lower()
+
+    def retrieve(self, artist, title, album):
+        key = self.__encode_key(artist, title, album)
+        return self.__cache.get(key)
+
+    def store(self, artist, title, album, mbid):
+        key = self.__encode_key(artist, title, album)
+        self.__cache[key] = mbid
+        self.__modified = True
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Find recording MBID based on artist, title and album.')
@@ -69,12 +107,18 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     args = parse_args()
 
-    try:
-        mbid = get_recording_mbid(args.artist, args.title, args.album)
-        print(mbid)
-    except ValueError:
-        print('Search returned no results!')
+    recording_cache = Cache()
 
+    mbid = recording_cache.retrieve(args.artist, args.title, args.album)
+    if mbid == None:
+        try:
+            mbid = get_recording_mbid(args.artist, args.title, args.album)
+            recording_cache.store(args.artist, args.title, args.album, mbid)
+            print(mbid)
+        except ValueError:
+            print('Search returned no results!')
+    else:
+        print(mbid)
 
 if __name__ == '__main__':
     main()
