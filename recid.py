@@ -32,7 +32,7 @@ class RecordingCache:
 
     @staticmethod
     def encode_key(artist, title, album):
-        return '\t'.join((artist, title, album)).lower()
+        return '\t'.join((artist, album, title)).lower()
 
     def lookup(self, artist, title, album):
         key = self.encode_key(artist, title, album)
