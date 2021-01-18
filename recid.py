@@ -8,40 +8,40 @@ import os
 import sys
 from xdg import BaseDirectory
 
-class Cache:
-    __cache_dir = BaseDirectory.save_cache_path('mbcache')
-    __cache_file = os.path.join(__cache_dir, 'recording_cache.json')
-    __cache = {}
-    __modified = False
-
+class RecordingCache:
     def __init__(self):
+        self.cache = {}
+        self.update_required = False
+        self.dir_path = BaseDirectory.save_cache_path('mbcache')
+        self.file_path = os.path.join(self.dir_path, 'recording_cache.json')
+
         try:
-            with open(self.__cache_file, 'r') as f:
-                self.__cache = json.load(f)
-            print('Loaded', len(self.__cache), 'entries from cache.')
+            with open(self.file_path, 'r') as f:
+                self.cache = json.load(f)
+            print('Loaded', len(self.cache), 'cache entries.')
         except FileNotFoundError:
             print('Cache file does not exist. Initializing empty cache.')
 
     def __del__(self):
-        if self.__modified:
-            with open(self.__cache_file, 'w') as f:
-                json.dump(self.__cache, f, indent=2)
+        if self.update_required:
+            with open(self.file_path, 'w') as f:
+                json.dump(self.cache, f, indent=2)
 
     def __str__(self):
-        return json.dumps(self.__cache, indent=2)
+        return json.dumps(self.cache, indent=2)
 
     @staticmethod
-    def __encode_key(artist, title, album):
+    def encode_key(artist, title, album):
         return '\t'.join((artist, title, album)).lower()
 
-    def retrieve(self, artist, title, album):
-        key = self.__encode_key(artist, title, album)
-        return self.__cache.get(key)
+    def lookup(self, artist, title, album):
+        key = self.encode_key(artist, title, album)
+        return self.cache.get(key)
 
     def store(self, artist, title, album, mbid):
-        key = self.__encode_key(artist, title, album)
-        self.__cache[key] = mbid
-        self.__modified = True
+        key = self.encode_key(artist, title, album)
+        self.cache[key] = mbid
+        self.update_required = True
 
 
 def parse_args():
@@ -107,17 +107,17 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     args = parse_args()
 
-    recording_cache = Cache()
+    cache = RecordingCache()
 
-    mbid = recording_cache.retrieve(args.artist, args.title, args.album)
+    mbid = cache.lookup(args.artist, args.title, args.album)
     if mbid == None:
         try:
             mbid = get_recording_mbid(args.artist, args.title, args.album)
-            recording_cache.store(args.artist, args.title, args.album, mbid)
-            print(mbid)
+            cache.store(args.artist, args.title, args.album, mbid)
         except ValueError:
             print('Search returned no results!')
-    else:
+
+    if mbid != None:
         print(mbid)
 
 if __name__ == '__main__':
