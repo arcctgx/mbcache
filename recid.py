@@ -57,11 +57,11 @@ def get_recording_mbid(artist, title, album):
     mb.set_useragent('mbcache', 'v0.1.0a')
 
     recordings = mb.search_recordings(artist=artist, recordingaccent=title, release=album, strict=True)
-    #print(json.dumps(recordings, sort_keys=True, indent=2))
     count = recordings['recording-count']
 
     if count == 0:
-        raise ValueError
+        print('Search returned no results!')
+        return None
     elif recordings['recording-count'] == 1:
         print('Search returned a single result:')
         print_candidates(recordings)
@@ -89,18 +89,20 @@ def print_candidates(recordings):
         except KeyError:
             isrcs = 0
 
-        print("[%d]\tscore = %s\t(%d albums, %d ISRCs)\t%s - \"%s\"%s" %
+        print('[%d]\tscore = %s\t(%d albums, %d ISRCs)\t%s - "%s"%s' %
                 (idx+1, score, albums, isrcs, artist, title, disambiguation))
 
 
 def select_recording(recordings):
     count = recordings['recording-count']
-    index = int(input('Which one to use? [1-%d] ' % count))
-    if index <= 0 or index > count:
-        print("Index %s out of range!" % index)
-        sys.exit(1)
 
-    return recordings['recording-list'][index-1]['id']
+    while True:
+        index = int(input('Which one to use? (0 - none of these) [0-%d] ' % count))
+        if index == 0:
+            print('Search result discarded.')
+            return None
+        elif index >= 1 and index <= count:
+            return recordings['recording-list'][index-1]['id']
 
 
 def main():
@@ -111,11 +113,9 @@ def main():
 
     mbid = cache.lookup(args.artist, args.title, args.album)
     if mbid == None:
-        try:
-            mbid = get_recording_mbid(args.artist, args.title, args.album)
+        mbid = get_recording_mbid(args.artist, args.title, args.album)
+        if mbid != None:
             cache.store(args.artist, args.title, args.album, mbid)
-        except ValueError:
-            print('Search returned no results!')
 
     if mbid != None:
         print(mbid)
