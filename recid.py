@@ -9,11 +9,12 @@ import sys
 from xdg import BaseDirectory
 
 class RecordingCache:
-    def __init__(self):
+    def __init__(self, name='recording_cache'):
         self.cache = {}
         self.update_required = False
         self.dir_path = BaseDirectory.save_cache_path('mbcache')
-        self.file_path = os.path.join(self.dir_path, 'recording_cache.json')
+        self.file_name = name + '.json'
+        self.file_path = os.path.join(self.dir_path, self.file_name)
 
         try:
             with open(self.file_path, 'r') as f:
