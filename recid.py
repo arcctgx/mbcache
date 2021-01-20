@@ -61,7 +61,8 @@ def parse_args():
 def get_recording_mbid(artist, title, album):
     mb.set_useragent('mbcache', 'v0.1.0a')
 
-    recordings = mb.search_recordings(artist=artist, recordingaccent=title, release=album, strict=True)
+    recordings = mb.search_recordings(artist=artist, recordingaccent=title, release=album,
+            video=False, strict=True)
     count = recordings['recording-count']
 
     if count == 0:
