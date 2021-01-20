@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import logging
 import musicbrainzngs as mb
 import os
 import sys
@@ -112,7 +111,6 @@ def select_recording(recordings):
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
     args = parse_args()
 
     cache = RecordingCache()
