@@ -9,9 +9,10 @@ import sys
 from xdg import BaseDirectory
 
 class RecordingCache:
-    def __init__(self, name='recording_cache'):
+    def __init__(self, name='recording_cache', sort_entries=False):
         self.cache = {}
         self.update_required = False
+        self.sort_entries = sort_entries
         self.dir_path = BaseDirectory.save_cache_path('mbcache')
         self.file_name = name + '.json'
         self.file_path = os.path.join(self.dir_path, self.file_name)
@@ -26,7 +27,11 @@ class RecordingCache:
     def __del__(self):
         if self.update_required:
             with open(self.file_path, 'w') as f:
-                json.dump(self.cache, f, indent=2)
+                if self.sort_entries:
+                    sorted_cache = dict(sorted(self.cache.items(), key=lambda i: i[0]))
+                    json.dump(sorted_cache, f, indent=2)
+                else:
+                    json.dump(self.cache, f, indent=2)
 
     def __str__(self):
         return json.dumps(self.cache, indent=2)
