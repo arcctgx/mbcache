@@ -1,30 +1,24 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-import sys
 import argparse
 import musicbrainzngs
-#import json
-#import logging
 import entities
 
 def query_album_mbid(album_mbid):
-    #logging.basicConfig(level=logging.DEBUG)
 
     musicbrainzngs.set_useragent("mbcache", "v0.1.0a")
 
     try:
         result = musicbrainzngs.get_release_by_id(album_mbid, includes=["artists", "recordings"])
     except musicbrainzngs.ResponseError as e:
-        print "Failed to look up release MBID \"%s\" %s" % (album_mbid, str(e))
+        print("Failed to look up release MBID \"%s\" %s" % (album_mbid, str(e)))
         return None
-
-    #print json.dumps(result, sort_keys=True, indent=2)
 
     try:
         release = result["release"]
         return release
     except KeyError:
-        print "Query for MBID \"%s\" returned empty result!" % album_mbid
+        print("Query for MBID \"%s\" returned empty result!" % album_mbid)
         return None
 
 def parse_release_data(release):
@@ -79,4 +73,4 @@ if __name__ == "__main__":
     release = query_album_mbid(args.mbid)
     if release:
         album = parse_release_data(release)
-        print repr(album)
+        print(repr(album))

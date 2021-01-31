@@ -1,4 +1,4 @@
-class Artist(object):
+class Artist:
     """
     MusicBrainz artist entity.
     attributes: name, mbid
@@ -8,11 +8,10 @@ class Artist(object):
         self.mbid = mbid
 
     def __repr__(self):
-        s = '%s\t%s' % (self.name, self.mbid)
-        return s.encode('utf-8')
+        return '%s\t%s' % (self.name, self.mbid)
 
 
-class Track(object):
+class Track:
     """
     MusicBrainz recording entity.
     attributes: title, mbid, time_base_60, time_seconds
@@ -24,15 +23,14 @@ class Track(object):
         self.time_seconds = self.to_seconds(time_base_60)
 
     def __repr__(self):
-        s = '%s\t%s\t%s' % (self.title, self.time_base_60, self.mbid)
-        return s.encode('utf-8')
+        return '%s\t%s\t%s' % (self.title, self.time_base_60, self.mbid)
 
     def to_seconds(self, minsec):
         m, s = minsec.split(':')
         return 60*int(m) + int(s)
 
 
-class Release(object):
+class Release:
     """
     Musicbrainz release entity.
     attributes: title, mbid
@@ -42,11 +40,10 @@ class Release(object):
         self.mbid = mbid
 
     def __repr__(self):
-        s = '%s\t%s' % (self.title, self.mbid)
-        return s.encode('utf-8')
+        return '%s\t%s' % (self.title, self.mbid)
 
 
-class Album(object):
+class Album:
     """
     MusicBrainz album entity.
     attributes: artist, title, mbid, tracklist
