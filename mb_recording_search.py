@@ -8,16 +8,15 @@ import sys
 from xdg import BaseDirectory
 
 class RecordingCache:
-    def __init__(self, name='recording_cache', sort_entries=False):
+    def __init__(self, application='mbcache', cache_name='recordings', sort_entries=False):
         self.cache = {}
         self.update_required = False
         self.sort_entries = sort_entries
-        self.dir_path = BaseDirectory.save_cache_path('mbcache')
-        self.file_name = name + '.json'
-        self.file_path = os.path.join(self.dir_path, self.file_name)
+        self.cache_dir = BaseDirectory.save_cache_path(application)
+        self.cache_path = os.path.join(self.cache_dir, cache_name + '.json')
 
         try:
-            with open(self.file_path, 'r') as f:
+            with open(self.cache_path, 'r') as f:
                 self.cache = json.load(f)
             print('Loaded', len(self.cache), 'cache entries.')
         except FileNotFoundError:
@@ -25,7 +24,7 @@ class RecordingCache:
 
     def __del__(self):
         if self.update_required:
-            with open(self.file_path, 'w') as f:
+            with open(self.cache_path, 'w') as f:
                 if self.sort_entries:
                     sorted_cache = dict(sorted(self.cache.items(), key=lambda i: i[0]))
                     json.dump(sorted_cache, f, indent=2)
