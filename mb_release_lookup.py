@@ -3,13 +3,14 @@
 import argparse
 import musicbrainzngs
 import entities
+from cache import ReleaseCache
 
 def query_album_mbid(album_mbid):
 
     musicbrainzngs.set_useragent("mbcache", "v0.1.0a")
 
     try:
-        result = musicbrainzngs.get_release_by_id(album_mbid, includes=["artists", "recordings"])
+        result = musicbrainzngs.get_release_by_id(album_mbid, includes=['artists', 'recordings', 'artist-credits'])
     except musicbrainzngs.ResponseError as e:
         print("Failed to look up release MBID \"%s\" %s" % (album_mbid, str(e)))
         return None
@@ -65,12 +66,18 @@ def parse_release_data(release):
 
     return entities.Album(art, rel, tracks)
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Fetch album data from MusicBrainz")
     parser.add_argument("mbid", help="release MBID to fetch data for")
     args = parser.parse_args()
 
+    cache = ReleaseCache()
+
     release = query_album_mbid(args.mbid)
     if release:
+        cache.store(release['artist-credit-phrase'], release['title'], release)
         album = parse_release_data(release)
         print(repr(album))
+
+if __name__ == '__main__':
+    main()
