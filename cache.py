@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import json
 import os
 from xdg import BaseDirectory
@@ -69,8 +70,22 @@ class ReleaseCache:
                 else:
                     json.dump(self.cache, f, indent=1)
 
+        self.remove_orphans()
+
     def __str__(self):
         return json.dumps(self.cache, indent=1)
+
+    def remove_orphans(self):
+        in_cache = set(glob.glob(os.path.join(self.cache_dir, '????????-????-????-????-????????????.json')))
+        in_index = set([os.path.join(self.cache_dir, mbid + '.json') for mbid in self.cache.values()])
+        orphans = in_cache - in_index
+        num_orphans = len(orphans)
+
+        for i in orphans:
+            os.remove(i)
+
+        if num_orphans > 0:
+            print('Removed', num_orphans, 'orphaned cache files.')
 
     @staticmethod
     def encode_key(artist, title):
