@@ -6,10 +6,10 @@ import os
 from xdg import BaseDirectory
 
 class RecordingCache:
-    def __init__(self, application='mbcache', cache_name='recordings', sort_entries=False):
+    def __init__(self, application='mbcache', cache_name='recordings', sort_index=False):
         self.cache = {}
         self.update_required = False
-        self.sort_entries = sort_entries
+        self.sort_index = sort_index
         self.cache_dir = BaseDirectory.save_cache_path(application)
         self.cache_path = os.path.join(self.cache_dir, cache_name + '.json')
 
@@ -23,11 +23,7 @@ class RecordingCache:
     def __del__(self):
         if self.update_required:
             with open(self.cache_path, 'w') as f:
-                if self.sort_entries:
-                    sorted_cache = dict(sorted(self.cache.items(), key=lambda i: i[0]))
-                    json.dump(sorted_cache, f, indent=2)
-                else:
-                    json.dump(self.cache, f, indent=2)
+                json.dump(self.cache, f, indent=2, sort_keys=self.sort_index)
 
     def __str__(self):
         return json.dumps(self.cache, indent=2)
@@ -47,10 +43,10 @@ class RecordingCache:
 
 
 class ReleaseCache:
-    def __init__(self, application='mbcache', cache_name='releases', sort_entries=False):
+    def __init__(self, application='mbcache', cache_name='releases', sort_index=False):
         self.cache = {}
         self.update_required = False
-        self.sort_entries = sort_entries
+        self.sort_index = sort_index
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.index_path = os.path.join(self.cache_dir, 'index.json')
 
@@ -64,11 +60,7 @@ class ReleaseCache:
     def __del__(self):
         if self.update_required:
             with open(self.index_path, 'w') as f:
-                if self.sort_entries:
-                    sorted_cache = dict(sorted(self.cache.items(), key=lambda i: i[0]))
-                    json.dump(sorted_cache, f, indent=1)
-                else:
-                    json.dump(self.cache, f, indent=1)
+                json.dump(self.cache, f, indent=1, sort_keys=self.sort_index)
 
         self.remove_orphans()
 
