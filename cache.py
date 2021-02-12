@@ -3,6 +3,7 @@
 import glob
 import json
 import os
+import time
 from xdg import BaseDirectory
 
 class RecordingCache:
@@ -23,10 +24,10 @@ class RecordingCache:
     def __del__(self):
         if self.update_required:
             with open(self.cache_path, 'w') as f:
-                json.dump(self.cache, f, indent=2, sort_keys=self.sort_index)
+                json.dump(self.cache, f, indent=1, sort_keys=self.sort_index)
 
     def __str__(self):
-        return json.dumps(self.cache, indent=2)
+        return json.dumps(self.cache, indent=1)
 
     @staticmethod
     def encode_key(artist, title, album):
@@ -34,11 +35,22 @@ class RecordingCache:
 
     def lookup(self, artist, title, album):
         key = self.encode_key(artist, title, album)
-        return self.cache.get(key)
+        try:
+            entry = self.cache[key]
+            entry['last_lookup'] = int(time.time())
+            self.update_required = True
+            return entry['id']
+        except KeyError:
+            return None
 
     def store(self, artist, title, album, mbid):
         key = self.encode_key(artist, title, album)
-        self.cache[key] = mbid
+        value = {
+            'id': mbid,
+            'last_update': int(time.time()),
+            'last_lookup': None
+        }
+        self.cache[key] = value
         self.update_required = True
 
 
@@ -69,7 +81,7 @@ class ReleaseCache:
 
     def remove_orphans(self):
         in_cache = set(glob.glob(os.path.join(self.cache_dir, '????????-????-????-????-????????????.json')))
-        in_index = set([os.path.join(self.cache_dir, mbid + '.json') for mbid in self.cache.values()])
+        in_index = set([os.path.join(self.cache_dir, entry['id'] + '.json') for entry in self.cache.values()])
         orphans = in_cache - in_index
         num_orphans = len(orphans)
 
@@ -85,10 +97,14 @@ class ReleaseCache:
 
     def lookup(self, artist, title):
         key = self.encode_key(artist, title)
-        if not key in self.cache.keys():
+        try:
+            entry = self.cache[key]
+            entry['last_lookup'] = int(time.time())
+            self.update_required = True
+        except KeyError:
             return None
 
-        mbid = self.cache.get(key)
+        mbid = entry['id']
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 
         try:
@@ -98,8 +114,14 @@ class ReleaseCache:
             return None
 
     def lookup_id(self, mbid):
-        if not mbid in self.cache.values():
+        index_mbids = [entry['id'] for entry in self.cache.values()]
+        if mbid not in index_mbids:
             return None
+
+        rev_index = {val['id']: key for key, val in self.cache.items()}
+        mbid_key = rev_index[mbid]
+        self.cache[mbid_key]['last_lookup'] = int(time.time())
+        self.update_required = True
 
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 
@@ -110,9 +132,14 @@ class ReleaseCache:
             return None
 
     def store(self, artist, title, release_data):
-        key = self.encode_key(artist, title)
         mbid = release_data['id']
-        self.cache[key] = mbid
+        key = self.encode_key(artist, title)
+        value = {
+            'id': mbid,
+            'last_update': int(time.time()),
+            'last_lookup': None
+        }
+        self.cache[key] = value
         self.update_required = True
 
         release_file = os.path.join(self.cache_dir, mbid + '.json')
