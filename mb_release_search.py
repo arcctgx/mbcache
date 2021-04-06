@@ -67,6 +67,9 @@ def print_search_results(releases):
 def select_from_search_results(releases):
     count = releases['release-count']
 
+    if count == 1:
+        return releases['release-list'][0]
+
     while True:
         index = int(input('Which one to use? (0 - none of these) [0-%d] ' % count))
 
@@ -82,19 +85,12 @@ def get_from_musicbrainz(artist, title):
     musicbrainzngs.set_useragent('mbcache', 'v0.1.0a')
 
     releases = musicbrainzngs.search_releases(artist=artist, releaseaccent=title, strict=True)
-
     print_search_results(releases)
 
-    count = releases['release-count']
+    if releases['release-count'] == 0:
+        return None
 
-    if count == 0:
-        data = None
-    elif count == 1:
-        data = releases['release-list'][0]
-    else:
-        data = select_from_search_results(releases)
-
-    return data
+    return select_from_search_results(releases)
 
 
 def get_from_cache(cache, artist, title):

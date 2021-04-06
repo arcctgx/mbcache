@@ -47,6 +47,9 @@ def print_search_results(recordings):
 def select_from_search_results(recordings):
     count = recordings['recording-count']
 
+    if count == 1:
+        return recordings['recording-list'][0]['id']
+
     while True:
         index = int(input('Which one to use? (0 - none of these) [0-%d] ' % count))
 
@@ -66,16 +69,10 @@ def get_from_musicbrainz(artist, title, album):
 
     print_search_results(recordings)
 
-    count = recordings['recording-count']
+    if recordings['recording-count'] == 0:
+        return None
 
-    if count == 0:
-        mbid = None
-    elif count == 1:
-        mbid = recordings['recording-list'][0]['id']
-    else:
-        mbid = select_from_search_results(recordings)
-
-    return mbid
+    return select_from_search_results(recordings)
 
 
 def get_from_cache(cache, artist, title, album):
