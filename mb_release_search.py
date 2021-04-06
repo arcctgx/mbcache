@@ -90,7 +90,17 @@ def get_from_musicbrainz(artist, title):
     if releases['release-count'] == 0:
         return None
 
-    return select_from_search_results(releases)
+    selected = select_from_search_results(releases)
+
+    if selected is None:
+        return None
+
+    try:
+        result = musicbrainzngs.get_release_by_id(selected['id'], includes=['artists', 'recordings', 'artist-credits'])
+        return result['release']
+    except musicbrainzngs.ResponseError as e:
+        print('Failed to look up release MBID %s: %s' % (selected['id'], str(e)))
+        return None
 
 
 def get_from_cache(cache, artist, title):
