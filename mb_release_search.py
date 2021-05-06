@@ -33,7 +33,7 @@ def print_search_results(releases):
             disambiguation = ''
 
         # TODO: figure out how to print this nicely
-        info = []
+        info = list()
 
         try:
             info.append(release['country'])
@@ -60,8 +60,9 @@ def print_search_results(releases):
         except KeyError:
             pass
 
-        print('[%d]\tscore = %s\t%s - "%s" (%s) %s' %
-                (idx+1, score, artist, title, ', '.join(info), disambiguation))
+        not_empty = [piece for piece in info if piece]
+        print('[%d]\tscore = %s\t%s - "%s" (%s)%s' %
+                (idx+1, score, artist, title, ', '.join(not_empty), disambiguation))
 
 
 def select_from_search_results(releases):
