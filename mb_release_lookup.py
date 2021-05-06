@@ -32,7 +32,7 @@ def main():
     release = query_album_mbid(args.mbid)
     if release:
         cache.store(release['artist-credit-phrase'], release['title'], release)
-        album = entities.Album.from_json_release(release)
+        album = entities.Album.from_json(release)
         print(repr(album))
 
 if __name__ == '__main__':

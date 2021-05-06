@@ -64,7 +64,7 @@ class Album:
         return '\n'.join(s)
 
     @classmethod
-    def from_json_release(cls, release):
+    def from_json(cls, release):
         # use MBID of first artist even in case of multiple artists
         # (last.fm seems to be doing that)
         art = Artist(
