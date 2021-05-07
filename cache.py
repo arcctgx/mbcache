@@ -31,7 +31,7 @@ class RecordingCache:
 
     @staticmethod
     def encode_key(artist, title, album):
-        return '\t'.join((artist, album, title)).lower()
+        return '\t'.join((artist, album, title)).casefold()
 
     def lookup(self, artist, title, album):
         key = self.encode_key(artist, title, album)
@@ -95,7 +95,7 @@ class ReleaseCache:
 
     @staticmethod
     def encode_key(artist, title):
-        return '\t'.join((artist, title)).lower()
+        return '\t'.join((artist, title)).casefold()
 
     def lookup(self, artist, title):
         key = self.encode_key(artist, title)
