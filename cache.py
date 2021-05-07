@@ -56,7 +56,7 @@ class RecordingCache:
 
 class ReleaseCache:
     def __init__(self, application='mbcache', cache_name='releases', sort_index=False):
-        self.cache = {}
+        self.cache = None
         self.update_required = False
         self.sort_index = sort_index
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
@@ -67,14 +67,16 @@ class ReleaseCache:
                 self.cache = json.load(f)
             print('Loaded', len(self.cache), 'cache entries.')
         except FileNotFoundError:
-            print('Cache file does not exist. Initialized empty cache.')
+            self.cache = dict()
+            print('Cache index does not exist. Initialized empty cache.')
 
     def __del__(self):
-        if self.update_required:
-            with open(self.index_path, 'w') as f:
-                json.dump(self.cache, f, indent=1, sort_keys=self.sort_index)
+        if self.cache is not None:
+            if self.update_required:
+                with open(self.index_path, 'w') as f:
+                    json.dump(self.cache, f, indent=1, sort_keys=self.sort_index)
 
-        self.remove_orphans()
+            self.remove_orphans()
 
     def __str__(self):
         return json.dumps(self.cache, indent=1)
