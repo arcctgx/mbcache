@@ -8,6 +8,8 @@ def parse_args():
     parser = argparse.ArgumentParser( description='Find release MBID based on artist and title.')
     parser.add_argument('artist', help='artist name')
     parser.add_argument('title', help='release title')
+    parser.add_argument('-d', '--disambiguation', default=None,
+        help='string to distinguish two otherwise identically named releases')
 
     return parser.parse_args()
 
@@ -97,19 +99,20 @@ def get_from_musicbrainz(artist, title):
         return None
 
     try:
-        result = musicbrainzngs.get_release_by_id(selected['id'], includes=['artists', 'recordings', 'artist-credits'])
+        result = musicbrainzngs.get_release_by_id(selected['id'],
+            includes=['artists', 'recordings', 'artist-credits'])
         return result['release']
     except musicbrainzngs.ResponseError as e:
         print('Failed to look up release MBID %s: %s' % (selected['id'], str(e)))
         return None
 
 
-def get_from_cache(cache, artist, title):
-    data = cache.lookup(artist, title)
+def get_from_cache(cache, artist, title, disambiguation=None):
+    data = cache.lookup(artist, title, disambiguation)
     if data is None:
         data = get_from_musicbrainz(artist, title)
         if data is not None:
-            cache.store(artist, title, data)
+            cache.store(artist, title, data, disambiguation)
 
     return data
 
@@ -117,7 +120,7 @@ def get_from_cache(cache, artist, title):
 def main():
     args = parse_args()
     cache = ReleaseCache()
-    release_data = get_from_cache(cache, args.artist, args.title)
+    release_data = get_from_cache(cache, args.artist, args.title, args.disambiguation)
 
     if release_data is not None:
         print(release_data)
