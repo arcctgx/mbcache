@@ -94,11 +94,14 @@ class ReleaseCache:
             print('Removed', num_orphans, 'orphaned cache files.')
 
     @staticmethod
-    def encode_key(artist, title):
-        return '\t'.join((artist, title)).casefold()
+    def encode_key(artist, title, disambiguation=None):
+        if disambiguation is None:
+            return '\t'.join((artist, title)).casefold()
 
-    def lookup(self, artist, title):
-        key = self.encode_key(artist, title)
+        return '\t'.join((artist, title, disambiguation)).casefold()
+
+    def lookup(self, artist, title, disambiguation=None):
+        key = self.encode_key(artist, title, disambiguation)
         try:
             entry = self.cache[key]
             entry['last_lookup'] = int(time.time())
@@ -133,9 +136,9 @@ class ReleaseCache:
         except FileNotFoundError:
             return None
 
-    def store(self, artist, title, release_data):
+    def store(self, artist, title, release_data, disambiguation=None):
         mbid = release_data['id']
-        key = self.encode_key(artist, title)
+        key = self.encode_key(artist, title, disambiguation)
         value = {
             'id': mbid,
             'last_update': int(time.time()),
