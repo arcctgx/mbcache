@@ -2,11 +2,16 @@
 
 import argparse
 import musicbrainzngs
-import entities
 from cache import ReleaseCache
 
-def query_album_mbid(album_mbid):
+def parse_args():
+    parser = argparse.ArgumentParser(description='Fetch release data from MusicBrainz based on MBID')
+    parser.add_argument('mbid', help='release MBID to fetch data for')
 
+    return parser.parse_args()
+
+
+def get_from_musicbrainz(album_mbid):
     musicbrainzngs.set_useragent('mbcache', 'v0.1.0a')
 
     try:
@@ -22,18 +27,25 @@ def query_album_mbid(album_mbid):
         print('Query for MBID %s returned empty result!' % album_mbid)
         return None
 
+
+def get_from_cache(cache, mbid):
+    data = cache.lookup_id(mbid)
+    if data is None:
+        data = get_from_musicbrainz(mbid)
+        if data is not None:
+            cache.store(data['artist-credit-phrase'], data['title'], data)
+
+    return data
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Fetch album data from MusicBrainz')
-    parser.add_argument('mbid', help='release MBID to fetch data for')
-    args = parser.parse_args()
-
+    args = parse_args()
     cache = ReleaseCache()
+    release_data = get_from_cache(cache, args.mbid)
 
-    release = query_album_mbid(args.mbid)
-    if release:
-        cache.store(release['artist-credit-phrase'], release['title'], release)
-        album = entities.Album.from_json(release)
-        print(repr(album))
+    if release_data is not None:
+        print(release_data)
+
 
 if __name__ == '__main__':
     main()
