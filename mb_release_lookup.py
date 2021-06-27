@@ -7,6 +7,8 @@ from cache import ReleaseCache
 def parse_args():
     parser = argparse.ArgumentParser(description='Fetch release data from MusicBrainz based on MBID')
     parser.add_argument('mbid', help='release MBID to fetch data for')
+    parser.add_argument('-d', '--disambiguation', default=None,
+        help='disambiguation string (only used for storing)')
 
     return parser.parse_args()
 
@@ -28,12 +30,12 @@ def get_from_musicbrainz(album_mbid):
         return None
 
 
-def get_from_cache(cache, mbid):
+def get_from_cache(cache, mbid, disambiguation=None):
     data = cache.lookup_id(mbid)
     if data is None:
         data = get_from_musicbrainz(mbid)
         if data is not None:
-            cache.store(data['artist-credit-phrase'], data['title'], data)
+            cache.store(data['artist-credit-phrase'], data['title'], data, disambiguation)
 
     return data
 
@@ -41,7 +43,7 @@ def get_from_cache(cache, mbid):
 def main():
     args = parse_args()
     cache = ReleaseCache()
-    release_data = get_from_cache(cache, args.mbid)
+    release_data = get_from_cache(cache, args.mbid, args.disambiguation)
 
     if release_data is not None:
         print(release_data)
