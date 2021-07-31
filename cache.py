@@ -142,7 +142,8 @@ class ReleaseCache:
         value = {
             'id': mbid,
             'last_update': int(time.time()),
-            'last_lookup': None
+            'last_lookup': None,
+            'permanent': False
         }
         self.cache[key] = value
         self.update_required = True
