@@ -5,6 +5,7 @@ import json
 import os
 import time
 
+from mbnames import normalize
 from xdg import BaseDirectory
 
 
@@ -47,7 +48,7 @@ class RecordingCache:
 
     @staticmethod
     def _encode_key(artist, title, album):
-        return '\t'.join((artist, album, title)).casefold()
+        return normalize('\t'.join((artist, album, title)))
 
     def lookup(self, artist, title, album):
         """Look up a recording MBID by artist, title and album."""
@@ -137,9 +138,9 @@ class ReleaseCache:
     @staticmethod
     def _encode_key(artist, title, disambiguation=None):
         if disambiguation is None:
-            return '\t'.join((artist, title)).casefold()
+            return normalize('\t'.join((artist, title)))
 
-        return '\t'.join((artist, title, disambiguation)).casefold()
+        return normalize('\t'.join((artist, title, disambiguation)))
 
     def lookup(self, artist, title, disambiguation=None):
         """
