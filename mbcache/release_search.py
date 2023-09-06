@@ -2,7 +2,7 @@
 
 import argparse
 import musicbrainzngs
-from cache import ReleaseCache
+from mbcache import ReleaseCache, APPNAME, VERSION, URL
 
 def parse_args():
     parser = argparse.ArgumentParser( description='Find release MBID based on artist and title.')
@@ -85,7 +85,7 @@ def select_from_search_results(releases):
 
 
 def get_from_musicbrainz(artist, title):
-    musicbrainzngs.set_useragent('mbcache', 'v0.1.0a')
+    musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
     releases = musicbrainzngs.search_releases(artist=artist, releaseaccent=title, strict=True)
     print_search_results(releases)

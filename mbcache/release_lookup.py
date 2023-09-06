@@ -2,7 +2,7 @@
 
 import argparse
 import musicbrainzngs
-from cache import ReleaseCache
+from mbcache import ReleaseCache, APPNAME, VERSION, URL
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Fetch release data from MusicBrainz based on MBID')
@@ -14,7 +14,7 @@ def parse_args():
 
 
 def get_from_musicbrainz(album_mbid):
-    musicbrainzngs.set_useragent('mbcache', 'v0.1.0a')
+    musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
     try:
         result = musicbrainzngs.get_release_by_id(album_mbid, includes=['artists', 'recordings', 'artist-credits'])

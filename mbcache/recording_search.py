@@ -2,7 +2,7 @@
 
 import argparse
 import musicbrainzngs
-from cache import RecordingCache
+from mbcache import RecordingCache, APPNAME, VERSION, URL
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -62,7 +62,7 @@ def select_from_search_results(recordings):
 
 
 def get_from_musicbrainz(artist, title, album):
-    musicbrainzngs.set_useragent('mbcache', 'v0.1.0a')
+    musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
     recordings = musicbrainzngs.search_recordings(artist=artist, recordingaccent=title,
             release=album, video=False, strict=True)
