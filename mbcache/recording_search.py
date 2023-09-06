@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument('artist', help='artist name')
     parser.add_argument('title', help='recording title')
     parser.add_argument('album', help='album title')
+    parser.add_argument('-v', '--version', action='version', version=VERSION)
 
     return parser.parse_args()
 

@@ -13,6 +13,7 @@ def parse_args():
                         '--disambiguation',
                         default=None,
                         help='string to distinguish two otherwise identically named releases')
+    parser.add_argument('-v', '--version', action='version', version=VERSION)
 
     return parser.parse_args()
 

@@ -13,6 +13,7 @@ def parse_args():
                         '--disambiguation',
                         default=None,
                         help='disambiguation string (only used for storing)')
+    parser.add_argument('-v', '--version', action='version', version=VERSION)
 
     return parser.parse_args()
 
