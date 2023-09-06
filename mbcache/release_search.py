@@ -4,12 +4,15 @@ import argparse
 import musicbrainzngs
 from mbcache import ReleaseCache, APPNAME, VERSION, URL
 
+
 def parse_args():
-    parser = argparse.ArgumentParser( description='Find release MBID based on artist and title.')
+    parser = argparse.ArgumentParser(description='Find release MBID based on artist and title.')
     parser.add_argument('artist', help='artist name')
     parser.add_argument('title', help='release title')
-    parser.add_argument('-d', '--disambiguation', default=None,
-        help='string to distinguish two otherwise identically named releases')
+    parser.add_argument('-d',
+                        '--disambiguation',
+                        default=None,
+                        help='string to distinguish two otherwise identically named releases')
 
     return parser.parse_args()
 
@@ -64,7 +67,7 @@ def print_search_results(releases):
 
         not_empty = [piece for piece in info if piece]
         print('[%d]\tscore = %s\t%s - "%s" (%s)%s' %
-                (idx+1, score, artist, title, ', '.join(not_empty), disambiguation))
+              (idx + 1, score, artist, title, ', '.join(not_empty), disambiguation))
 
 
 def select_from_search_results(releases):
@@ -81,7 +84,7 @@ def select_from_search_results(releases):
             return None
 
         if 1 <= index <= count:
-            return releases['release-list'][index-1]
+            return releases['release-list'][index - 1]
 
 
 def get_from_musicbrainz(artist, title):
@@ -99,8 +102,8 @@ def get_from_musicbrainz(artist, title):
         return None
 
     try:
-        result = musicbrainzngs.get_release_by_id(selected['id'],
-            includes=['artists', 'recordings', 'artist-credits'])
+        result = musicbrainzngs.get_release_by_id(
+            selected['id'], includes=['artists', 'recordings', 'artist-credits'])
         return result['release']
     except musicbrainzngs.ResponseError as e:
         print('Failed to look up release MBID %s: %s' % (selected['id'], str(e)))

@@ -4,9 +4,10 @@ import argparse
 import musicbrainzngs
 from mbcache import RecordingCache, APPNAME, VERSION, URL
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
-            description='Find recording MBID based on artist, title and album.')
+        description='Find recording MBID based on artist, title and album.')
     parser.add_argument('artist', help='artist name')
     parser.add_argument('title', help='recording title')
     parser.add_argument('album', help='album title')
@@ -41,7 +42,7 @@ def print_search_results(recordings):
             isrcs = 0
 
         print('[%d]\tscore = %s\t(%d releases, %d ISRCs)\t%s - "%s"%s' %
-                (idx+1, score, albums, isrcs, artist, title, disambiguation))
+              (idx + 1, score, albums, isrcs, artist, title, disambiguation))
 
 
 def select_from_search_results(recordings):
@@ -58,14 +59,17 @@ def select_from_search_results(recordings):
             return None
 
         if 1 <= index <= count:
-            return recordings['recording-list'][index-1]['id']
+            return recordings['recording-list'][index - 1]['id']
 
 
 def get_from_musicbrainz(artist, title, album):
     musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
-    recordings = musicbrainzngs.search_recordings(artist=artist, recordingaccent=title,
-            release=album, video=False, strict=True)
+    recordings = musicbrainzngs.search_recordings(artist=artist,
+                                                  recordingaccent=title,
+                                                  release=album,
+                                                  video=False,
+                                                  strict=True)
 
     print_search_results(recordings)
 
