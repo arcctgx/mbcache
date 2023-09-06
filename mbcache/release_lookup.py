@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Fetch release data from MusicBrainz based on MBID."""
 
 import argparse
 import musicbrainzngs

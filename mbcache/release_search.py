@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Find release MBID based on artist and title."""
 
 import argparse
 import musicbrainzngs

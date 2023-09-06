@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Find recording MBID based on artist, title and album."""
 
 import argparse
 import musicbrainzngs
