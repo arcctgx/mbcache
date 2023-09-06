@@ -24,15 +24,15 @@ def get_from_musicbrainz(album_mbid):
     try:
         result = musicbrainzngs.get_release_by_id(
             album_mbid, includes=['artists', 'recordings', 'artist-credits'])
-    except musicbrainzngs.ResponseError as e:
-        print('Failed to look up release MBID %s: %s' % (album_mbid, str(e)))
+    except musicbrainzngs.ResponseError as exc:
+        print(f'Failed to look up release MBID {album_mbid}: {exc}')
         return None
 
     try:
         release = result['release']
         return release
     except KeyError:
-        print('Query for MBID %s returned empty result!' % album_mbid)
+        print(f'Query for MBID {album_mbid} returned empty result!')
         return None
 
 

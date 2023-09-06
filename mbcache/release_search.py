@@ -26,7 +26,7 @@ def print_search_results(releases):
     elif count == 1:
         print('Search returned a single result:')
     else:
-        print('Search returned %d results:' % count)
+        print(f'Search returned {count} results:')
 
     for (idx, release) in enumerate(releases['release-list']):
         score = release['ext:score']
@@ -39,7 +39,7 @@ def print_search_results(releases):
             disambiguation = ''
 
         # TODO: figure out how to print this nicely
-        info = list()
+        info = []
 
         try:
             info.append(release['country'])
@@ -78,7 +78,7 @@ def select_from_search_results(releases):
         return releases['release-list'][0]
 
     while True:
-        index = int(input('Which one to use? (0 - none of these) [0-%d] ' % count))
+        index = int(input(f'Which one to use? (0 - none of these) [0-{count}] '))
 
         if index == 0:
             print('Search result discarded.')
@@ -106,8 +106,8 @@ def get_from_musicbrainz(artist, title):
         result = musicbrainzngs.get_release_by_id(
             selected['id'], includes=['artists', 'recordings', 'artist-credits'])
         return result['release']
-    except musicbrainzngs.ResponseError as e:
-        print('Failed to look up release MBID %s: %s' % (selected['id'], str(e)))
+    except musicbrainzngs.ResponseError as exc:
+        print(f'Failed to look up release MBID {selected["id"]}: {exc}')
         return None
 
 

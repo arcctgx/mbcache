@@ -24,7 +24,7 @@ def print_search_results(recordings):
     elif count == 1:
         print('Search returned a single result:')
     else:
-        print('Search returned %d results:' % count)
+        print(f'Search returned {count} results:')
 
     for (idx, recording) in enumerate(recordings['recording-list']):
         score = recording['ext:score']
@@ -53,7 +53,7 @@ def select_from_search_results(recordings):
         return recordings['recording-list'][0]['id']
 
     while True:
-        index = int(input('Which one to use? (0 - none of these) [0-%d] ' % count))
+        index = int(input(f'Which one to use? (0 - none of these) [0-{count}] '))
 
         if index == 0:
             print('Search result discarded.')
