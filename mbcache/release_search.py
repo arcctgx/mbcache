@@ -5,7 +5,7 @@ import musicbrainzngs
 from mbcache import ReleaseCache, APPNAME, VERSION, URL
 
 
-def parse_args():
+def _parse_args():
     parser = argparse.ArgumentParser(description='Find release MBID based on artist and title.')
     parser.add_argument('artist', help='artist name')
     parser.add_argument('title', help='release title')
@@ -18,7 +18,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_search_results(releases):
+def _print_search_results(releases):
     count = releases['release-count']
 
     if count == 0:
@@ -71,7 +71,7 @@ def print_search_results(releases):
               (idx + 1, score, artist, title, ', '.join(not_empty), disambiguation))
 
 
-def select_from_search_results(releases):
+def _select_from_search_results(releases):
     count = releases['release-count']
 
     if count == 1:
@@ -88,16 +88,16 @@ def select_from_search_results(releases):
             return releases['release-list'][index - 1]
 
 
-def get_from_musicbrainz(artist, title):
+def _get_from_musicbrainz(artist, title):
     musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
     releases = musicbrainzngs.search_releases(artist=artist, releaseaccent=title, strict=True)
-    print_search_results(releases)
+    _print_search_results(releases)
 
     if releases['release-count'] == 0:
         return None
 
-    selected = select_from_search_results(releases)
+    selected = _select_from_search_results(releases)
 
     if selected is None:
         return None
@@ -111,10 +111,10 @@ def get_from_musicbrainz(artist, title):
         return None
 
 
-def get_from_cache(cache, artist, title, disambiguation=None):
+def _get_from_cache(cache, artist, title, disambiguation=None):
     data = cache.lookup(artist, title, disambiguation)
     if data is None:
-        data = get_from_musicbrainz(artist, title)
+        data = _get_from_musicbrainz(artist, title)
         if data is not None:
             cache.store(artist, title, data, disambiguation)
 
@@ -122,9 +122,9 @@ def get_from_cache(cache, artist, title, disambiguation=None):
 
 
 def main():
-    args = parse_args()
+    args = _parse_args()
     cache = ReleaseCache()
-    release_data = get_from_cache(cache, args.artist, args.title, args.disambiguation)
+    release_data = _get_from_cache(cache, args.artist, args.title, args.disambiguation)
 
     if release_data is not None:
         print(release_data)

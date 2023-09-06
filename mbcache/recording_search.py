@@ -5,7 +5,7 @@ import musicbrainzngs
 from mbcache import RecordingCache, APPNAME, VERSION, URL
 
 
-def parse_args():
+def _parse_args():
     parser = argparse.ArgumentParser(
         description='Find recording MBID based on artist, title and album.')
     parser.add_argument('artist', help='artist name')
@@ -16,7 +16,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_search_results(recordings):
+def _print_search_results(recordings):
     count = recordings['recording-count']
 
     if count == 0:
@@ -46,7 +46,7 @@ def print_search_results(recordings):
               (idx + 1, score, albums, isrcs, artist, title, disambiguation))
 
 
-def select_from_search_results(recordings):
+def _select_from_search_results(recordings):
     count = recordings['recording-count']
 
     if count == 1:
@@ -63,7 +63,7 @@ def select_from_search_results(recordings):
             return recordings['recording-list'][index - 1]['id']
 
 
-def get_from_musicbrainz(artist, title, album):
+def _get_from_musicbrainz(artist, title, album):
     musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
 
     recordings = musicbrainzngs.search_recordings(artist=artist,
@@ -72,18 +72,18 @@ def get_from_musicbrainz(artist, title, album):
                                                   video=False,
                                                   strict=True)
 
-    print_search_results(recordings)
+    _print_search_results(recordings)
 
     if recordings['recording-count'] == 0:
         return None
 
-    return select_from_search_results(recordings)
+    return _select_from_search_results(recordings)
 
 
-def get_from_cache(cache, artist, title, album):
+def _get_from_cache(cache, artist, title, album):
     mbid = cache.lookup(artist, title, album)
     if mbid is None:
-        mbid = get_from_musicbrainz(artist, title, album)
+        mbid = _get_from_musicbrainz(artist, title, album)
         if mbid is not None:
             cache.store(artist, title, album, mbid)
 
@@ -91,9 +91,9 @@ def get_from_cache(cache, artist, title, album):
 
 
 def main():
-    args = parse_args()
+    args = _parse_args()
     cache = RecordingCache()
-    mbid = get_from_cache(cache, args.artist, args.title, args.album)
+    mbid = _get_from_cache(cache, args.artist, args.title, args.album)
 
     if mbid is not None:
         print(mbid)
