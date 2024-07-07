@@ -1,8 +1,10 @@
 """Find release MBID based on artist and title."""
 
 import argparse
+
 import musicbrainzngs
-from mbcache import ReleaseCache, APPNAME, VERSION, URL
+
+from mbcache import APPNAME, URL, VERSION, ReleaseCache
 
 
 def _parse_args():

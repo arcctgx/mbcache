@@ -1,8 +1,10 @@
 """Fetch release data from MusicBrainz based on MBID."""
 
 import argparse
+
 import musicbrainzngs
-from mbcache import ReleaseCache, APPNAME, VERSION, URL
+
+from mbcache import APPNAME, URL, VERSION, ReleaseCache
 
 
 def _parse_args():

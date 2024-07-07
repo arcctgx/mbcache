@@ -1,8 +1,10 @@
 """Find recording MBID based on artist, title and album."""
 
 import argparse
+
 import musicbrainzngs
-from mbcache import RecordingCache, APPNAME, VERSION, URL
+
+from mbcache import APPNAME, URL, VERSION, RecordingCache
 
 
 def _parse_args():
