@@ -1,5 +1,7 @@
 # mbcache
 
+[![MusicBrainz](https://img.shields.io/badge/built_with-MusicBrainz-BA478F?logo=musicbrainz)](https://musicbrainz.org)
+
 A simple cache for MusicBrainz data.
 
 ## Features
