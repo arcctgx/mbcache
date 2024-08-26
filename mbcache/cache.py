@@ -82,7 +82,7 @@ class ReleaseCache:
     Index keys are derived from artist names and release titles, which must be
     unique. To make it possible to keep multiple versions of the same album in
     cache, an optional disambiguation string can be provided to distinguish
-    otherwise indentically named releases. If disambiguation string is not
+    otherwise identically named releases. If disambiguation string is not
     provided when another release with the same name artist and title is stored
     in cache, the cache entry will be replaced and old release JSON file will
     be removed.
@@ -199,4 +199,4 @@ class ReleaseCache:
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 
         with open(release_file, 'w', encoding='utf-8') as rel:
-            json.dump(release_data, rel, indent=0)
+            json.dump(release_data, rel, indent=1)
