@@ -1,5 +1,3 @@
-from mbcache.cache import RecordingCache, ReleaseCache
+"""Caches for MusicBrainz entities."""
 
-APPNAME = 'mbcache'
-VERSION = 'v0.1.0'
-URL = 'https://github.com/arcctgx/mbcache'
+from mbcache.interface import MbRecordingCache, MbReleaseCache

@@ -1,60 +1,33 @@
-"""Fetch release data from MusicBrainz based on MBID."""
+"""Find MusicBrainz release based on MBID."""
 
 import argparse
 
-import musicbrainzngs
-
-from mbcache import APPNAME, URL, VERSION, ReleaseCache
+from mbcache import MbReleaseCache
+from mbcache.version import VERSION
 
 
 def _parse_args():
-    parser = argparse.ArgumentParser(
-        description='Fetch release data from MusicBrainz based on MBID')
+    parser = argparse.ArgumentParser(description='Find MusicBrainz release based on MBID')
+
     parser.add_argument('mbid', help='release MBID to fetch data for')
+
     parser.add_argument('-d',
                         '--disambiguation',
                         default=None,
                         help='disambiguation string (only used for storing)')
+
     parser.add_argument('-v', '--version', action='version', version=VERSION)
 
     return parser.parse_args()
 
 
-def _get_from_musicbrainz(album_mbid):
-    musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
-
-    try:
-        result = musicbrainzngs.get_release_by_id(
-            album_mbid, includes=['artists', 'recordings', 'artist-credits'])
-    except musicbrainzngs.ResponseError as exc:
-        print(f'Failed to look up release MBID {album_mbid}: {exc}')
-        return None
-
-    try:
-        release = result['release']
-        return release
-    except KeyError:
-        print(f'Query for MBID {album_mbid} returned empty result!')
-        return None
-
-
-def _get_from_cache(cache, mbid, disambiguation=None):
-    data = cache.lookup_id(mbid)
-    if data is None:
-        data = _get_from_musicbrainz(mbid)
-        if data is not None:
-            cache.store(data['artist-credit-phrase'], data['title'], data, disambiguation)
-
-    return data
-
-
 def main():
     args = _parse_args()
-    cache = ReleaseCache()
-    release_data = _get_from_cache(cache, args.mbid, args.disambiguation)
+    cache = MbReleaseCache()
+    release = cache.get_mbid(args.mbid, args.disambiguation)
 
-    if release_data is not None:
-        print(release_data)
+    if release is not None:
+        print(release)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
-from mbcache import APPNAME, VERSION, URL
+from setuptools import find_packages, setup
+
+from mbcache.version import APPNAME, URL, VERSION
 
 with open('README.md', encoding='utf-8') as f:
     readme = f.read()

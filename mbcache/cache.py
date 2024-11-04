@@ -9,7 +9,7 @@ from mbnames import normalize
 from xdg import BaseDirectory
 
 
-class RecordingCache:
+class _RecordingCache:
     """
     Cache for storing recording MBIDs.
 
@@ -24,7 +24,7 @@ class RecordingCache:
     Cache stores times of last update and last lookup as UNIX timestamps.
     """
 
-    def __init__(self, application='mbcache', cache_name='recordings', sort_index=False):
+    def __init__(self, application, cache_name, sort_index=False):
         self.cache = {}
         self.update_required = False
         self.sort_index = sort_index
@@ -69,7 +69,7 @@ class RecordingCache:
         self.update_required = True
 
 
-class ReleaseCache:
+class _ReleaseCache:
     """
     Cache for storing MusicBrainz release data.
 
@@ -93,7 +93,7 @@ class ReleaseCache:
     replaced as described above).
     """
 
-    def __init__(self, application='mbcache', cache_name='releases', sort_index=False):
+    def __init__(self, application, cache_name, sort_index=False):
         self.cache = None
         self.update_required = False
         self.sort_index = sort_index
