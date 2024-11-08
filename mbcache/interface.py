@@ -93,12 +93,13 @@ class MbRecordingCache:
         If the search result is ambiguous, present the choices to the user
         and ask them to select the best-matching recording.
         """
-
         mbid = self._cache.lookup(artist, title, album)
-        if mbid is None:
-            mbid = self._search_in_musicbrainz(artist, title, album)
-            if mbid is not None:
-                self._cache.store(artist, title, album, mbid)
+        if mbid is not None:
+            return mbid
+
+        mbid = self._search_in_musicbrainz(artist, title, album)
+        if mbid is not None:
+            self._cache.store(artist, title, album, mbid)
 
         return mbid
 
@@ -229,12 +230,13 @@ class MbReleaseCache:
         future use. If the search result is ambiguous, present the choices to
         the user and ask them to select the best-matching release.
         """
-
         release = self._cache.lookup(artist, title, disambiguation)
-        if release is None:
-            release = self._search_in_musicbrainz(artist, title)
-            if release is not None:
-                self._cache.store(artist, title, release, disambiguation)
+        if release is not None:
+            return release
+
+        release = self._search_in_musicbrainz(artist, title)
+        if release is not None:
+            self._cache.store(artist, title, release, disambiguation)
 
         return release
 
@@ -247,12 +249,13 @@ class MbReleaseCache:
         The optional disambiguation string parameter is used only for storing
         the release in the cache.
         """
-
         release = self._cache.lookup_id(mbid)
-        if release is None:
-            release = self._lookup_in_musicbrainz(mbid)
-            if release is not None:
-                self._cache.store(release['artist-credit-phrase'], release['title'], release,
-                                  disambiguation)
+        if release is not None:
+            return release
+
+        release = self._lookup_in_musicbrainz(mbid)
+        if release is not None:
+            self._cache.store(release['artist-credit-phrase'], release['title'], release,
+                              disambiguation)
 
         return release
