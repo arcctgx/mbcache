@@ -11,7 +11,39 @@ from xdg import BaseDirectory
 from mbcache.lock import _Lock
 
 
-class _RecordingCache:
+class _Cache:
+    """Base class for entity-specific MusicBrainz caches."""
+
+    def __init__(self, application, cache_name):
+        self.cache = None
+        self.update_required = False
+        self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
+        self.index_path = os.path.join(self.cache_dir, 'index.json')
+        self.lock = _Lock(os.path.join(self.cache_dir, f'.{cache_name}.lock'))
+
+        self.lock.acquire()
+
+        try:
+            with open(self.index_path, encoding='utf-8') as cache_index:
+                self.cache = json.load(cache_index)
+            print('Loaded', len(self.cache), 'cache entries.')
+        except FileNotFoundError:
+            self.cache = {}
+            print('Cache index does not exist. Initialized empty cache.')
+
+    def __del__(self):
+        if self.cache is not None:
+            if self.update_required:
+                with open(self.index_path, 'w', encoding='utf-8') as cache_index:
+                    json.dump(self.cache, cache_index, indent=1, sort_keys=True)
+
+        self.lock.release()
+
+    def __repr__(self):
+        return json.dumps(self.cache, indent=1)
+
+
+class _RecordingCache(_Cache):
     """
     Cache for storing recording MBIDs.
 
@@ -25,30 +57,6 @@ class _RecordingCache:
 
     Cache stores times of last update and last lookup as UNIX timestamps.
     """
-
-    def __init__(self, application, cache_name):
-        self.cache = {}
-        self.update_required = False
-        self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
-        self.cache_path = os.path.join(self.cache_dir, 'index.json')
-        self.lock = _Lock(os.path.join(self.cache_dir, f'.{cache_name}.lock'))
-
-        self.lock.acquire()
-        try:
-            with open(self.cache_path, encoding='utf-8') as cache_file:
-                self.cache = json.load(cache_file)
-            print('Loaded', len(self.cache), 'cache entries.')
-        except FileNotFoundError:
-            print('Cache file does not exist. Initializing empty cache.')
-
-    def __del__(self):
-        if self.update_required:
-            with open(self.cache_path, 'w', encoding='utf-8') as cache_file:
-                json.dump(self.cache, cache_file, indent=1, sort_keys=True)
-        self.lock.release()
-
-    def __str__(self):
-        return json.dumps(self.cache, indent=1)
 
     @staticmethod
     def _encode_key(artist, title, album):
@@ -73,7 +81,7 @@ class _RecordingCache:
         self.update_required = True
 
 
-class _ReleaseCache:
+class _ReleaseCache(_Cache):
     """
     Cache for storing MusicBrainz release data.
 
@@ -97,32 +105,10 @@ class _ReleaseCache:
     replaced as described above).
     """
 
-    def __init__(self, application, cache_name):
-        self.cache = None
-        self.update_required = False
-        self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
-        self.index_path = os.path.join(self.cache_dir, 'index.json')
-        self.lock = _Lock(os.path.join(self.cache_dir, f'.{cache_name}.lock'))
-
-        self.lock.acquire()
-        try:
-            with open(self.index_path, encoding='utf-8') as cache_index:
-                self.cache = json.load(cache_index)
-            print('Loaded', len(self.cache), 'cache entries.')
-        except FileNotFoundError:
-            self.cache = {}
-            print('Cache index does not exist. Initialized empty cache.')
-
     def __del__(self):
         if self.cache is not None:
-            if self.update_required:
-                with open(self.index_path, 'w', encoding='utf-8') as cache_index:
-                    json.dump(self.cache, cache_index, indent=1, sort_keys=True)
             self._remove_orphans()
-        self.lock.release()
-
-    def __str__(self):
-        return json.dumps(self.cache, indent=1)
+        super().__del__()
 
     def _remove_orphans(self):
         in_cache = set(
