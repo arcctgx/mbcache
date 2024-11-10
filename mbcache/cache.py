@@ -24,10 +24,9 @@ class _RecordingCache:
     Cache stores times of last update and last lookup as UNIX timestamps.
     """
 
-    def __init__(self, application, cache_name, sort_index=False):
+    def __init__(self, application, cache_name):
         self.cache = {}
         self.update_required = False
-        self.sort_index = sort_index
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.cache_path = os.path.join(self.cache_dir, 'index.json')
 
@@ -41,7 +40,7 @@ class _RecordingCache:
     def __del__(self):
         if self.update_required:
             with open(self.cache_path, 'w', encoding='utf-8') as cache_file:
-                json.dump(self.cache, cache_file, indent=1, sort_keys=self.sort_index)
+                json.dump(self.cache, cache_file, indent=1, sort_keys=True)
 
     def __str__(self):
         return json.dumps(self.cache, indent=1)
@@ -93,10 +92,9 @@ class _ReleaseCache:
     replaced as described above).
     """
 
-    def __init__(self, application, cache_name, sort_index=False):
+    def __init__(self, application, cache_name):
         self.cache = None
         self.update_required = False
-        self.sort_index = sort_index
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.index_path = os.path.join(self.cache_dir, 'index.json')
 
@@ -112,7 +110,7 @@ class _ReleaseCache:
         if self.cache is not None:
             if self.update_required:
                 with open(self.index_path, 'w', encoding='utf-8') as cache_index:
-                    json.dump(self.cache, cache_index, indent=1, sort_keys=self.sort_index)
+                    json.dump(self.cache, cache_index, indent=1, sort_keys=True)
 
             self._remove_orphans()
 
