@@ -14,6 +14,10 @@ A simple cache for MusicBrainz data.
 * cache naming (allows creating multiple independent caches per application)
 * command-line utilities for adding recordings and releases to cache
 
-## Caveats
+## Restrictions
 
-Current implementation is not thread-safe.
+Built-in locking mechanism protects against concurrent access by different
+processes, but not by threads within one process. It is the responsibility
+of the user to ensure thread-level synchronization.
+
+Only POSIX-compliant operating systems are supported.

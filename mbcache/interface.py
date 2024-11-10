@@ -3,6 +3,10 @@ This module provides high-level cache objects for direct use by applications.
 The included classes manage searching for entities in MusicBrainz, displaying
 search results to users, and handling storage and retrieval operations via
 low-level cache objects.
+
+The caches are protected against concurrent access by different processes, but
+not by multiple threads within one process. It is the responsibility of the
+user to ensure thread-level synchronization.
 """
 
 import musicbrainzngs

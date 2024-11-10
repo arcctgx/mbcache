@@ -8,6 +8,8 @@ import time
 from mbnames import normalize
 from xdg import BaseDirectory
 
+from mbcache.lock import _Lock
+
 
 class _RecordingCache:
     """
@@ -29,7 +31,9 @@ class _RecordingCache:
         self.update_required = False
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.cache_path = os.path.join(self.cache_dir, 'index.json')
+        self.lock = _Lock(os.path.join(self.cache_dir, f'.{cache_name}.lock'))
 
+        self.lock.acquire()
         try:
             with open(self.cache_path, encoding='utf-8') as cache_file:
                 self.cache = json.load(cache_file)
@@ -41,6 +45,7 @@ class _RecordingCache:
         if self.update_required:
             with open(self.cache_path, 'w', encoding='utf-8') as cache_file:
                 json.dump(self.cache, cache_file, indent=1, sort_keys=True)
+        self.lock.release()
 
     def __str__(self):
         return json.dumps(self.cache, indent=1)
@@ -97,7 +102,9 @@ class _ReleaseCache:
         self.update_required = False
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.index_path = os.path.join(self.cache_dir, 'index.json')
+        self.lock = _Lock(os.path.join(self.cache_dir, f'.{cache_name}.lock'))
 
+        self.lock.acquire()
         try:
             with open(self.index_path, encoding='utf-8') as cache_index:
                 self.cache = json.load(cache_index)
@@ -111,8 +118,8 @@ class _ReleaseCache:
             if self.update_required:
                 with open(self.index_path, 'w', encoding='utf-8') as cache_index:
                     json.dump(self.cache, cache_index, indent=1, sort_keys=True)
-
             self._remove_orphans()
+        self.lock.release()
 
     def __str__(self):
         return json.dumps(self.cache, indent=1)
