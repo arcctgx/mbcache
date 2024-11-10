@@ -28,8 +28,8 @@ class _RecordingCache:
         self.cache = {}
         self.update_required = False
         self.sort_index = sort_index
-        self.cache_dir = BaseDirectory.save_cache_path(application)
-        self.cache_path = os.path.join(self.cache_dir, cache_name + '.json')
+        self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
+        self.cache_path = os.path.join(self.cache_dir, 'index.json')
 
         try:
             with open(self.cache_path, encoding='utf-8') as cache_file:
