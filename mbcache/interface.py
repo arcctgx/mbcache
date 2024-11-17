@@ -105,13 +105,19 @@ class MbRecordingCache(_MbCache):
         If the search result is ambiguous, present the choices to the user
         and ask them to select the best-matching recording.
         """
-        mbid = self._cache.lookup(artist, title, album)
+        params = {
+            'artist': artist,
+            'title': title,
+            'album': album,
+        }
+
+        mbid = self._cache.lookup(params)
         if mbid is not None:
             return mbid
 
         mbid = self._search_in_musicbrainz(artist, title, album)
         if mbid is not None:
-            self._cache.store(artist, title, album, mbid)
+            self._cache.store(mbid, params)
 
         return mbid
 
@@ -242,13 +248,19 @@ class MbReleaseCache(_MbCache):
         future use. If the search result is ambiguous, present the choices to
         the user and ask them to select the best-matching release.
         """
-        release = self._cache.lookup(artist, title, disambiguation)
+        params = {
+            'artist': artist,
+            'title': title,
+            'disambiguation': disambiguation,
+        }
+
+        release = self._cache.lookup(params)
         if release is not None:
             return release
 
         release = self._search_in_musicbrainz(artist, title)
         if release is not None:
-            self._cache.store(artist, title, release, disambiguation)
+            self._cache.store(release, params)
 
         return release
 
@@ -267,7 +279,11 @@ class MbReleaseCache(_MbCache):
 
         release = self._lookup_in_musicbrainz(mbid)
         if release is not None:
-            self._cache.store(release['artist-credit-phrase'], release['title'], release,
-                              disambiguation)
+            params = {
+                'artist': release['artist-credit-phrase'],
+                'title': release['title'],
+                'disambiguation': disambiguation,
+            }
+            self._cache.store(release, params)
 
         return release

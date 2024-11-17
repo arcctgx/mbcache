@@ -42,6 +42,11 @@ class _Cache:
     def __repr__(self):
         return json.dumps(self.cache, indent=1)
 
+    @staticmethod
+    def _encode_key(_params):
+        """Convert entity parameters to a cache key string."""
+        raise NotImplementedError
+
 
 class _RecordingCache(_Cache):
     """
@@ -59,12 +64,12 @@ class _RecordingCache(_Cache):
     """
 
     @staticmethod
-    def _encode_key(artist, title, album):
-        return normalize('\t'.join((artist, album, title)))
+    def _encode_key(params):
+        return normalize('\t'.join((params['artist'], params['album'], params['title'])))
 
-    def lookup(self, artist, title, album):
+    def lookup(self, params):
         """Look up a recording MBID by artist, title and album."""
-        key = self._encode_key(artist, title, album)
+        key = self._encode_key(params)
         try:
             entry = self.cache[key]
             entry['last_lookup'] = int(time.time())
@@ -73,9 +78,9 @@ class _RecordingCache(_Cache):
         except KeyError:
             return None
 
-    def store(self, artist, title, album, mbid):
+    def store(self, mbid, params):
         """Store a recording MBID in cache."""
-        key = self._encode_key(artist, title, album)
+        key = self._encode_key(params)
         value = {'id': mbid, 'last_update': int(time.time()), 'last_lookup': None}
         self.cache[key] = value
         self.update_required = True
@@ -127,18 +132,18 @@ class _ReleaseCache(_Cache):
             print('Removed', num_orphans, 'orphaned cache files.')
 
     @staticmethod
-    def _encode_key(artist, title, disambiguation=None):
-        if disambiguation is None:
-            return normalize('\t'.join((artist, title)))
+    def _encode_key(params):
+        if params['disambiguation'] is None:
+            return normalize('\t'.join((params['artist'], params['title'])))
 
-        return normalize('\t'.join((artist, title, disambiguation)))
+        return normalize('\t'.join((params['artist'], params['title'], params['disambiguation'])))
 
-    def lookup(self, artist, title, disambiguation=None):
+    def lookup(self, params):
         """
         Look up release data by artist, title
         and optional disambiguation string.
         """
-        key = self._encode_key(artist, title, disambiguation)
+        key = self._encode_key(params)
         try:
             entry = self.cache[key]
             entry['last_lookup'] = int(time.time())
@@ -174,10 +179,10 @@ class _ReleaseCache(_Cache):
         except FileNotFoundError:
             return None
 
-    def store(self, artist, title, release_data, disambiguation=None):
+    def store(self, release_data, params):
         """Store release data in cache, with optional disambiguation string."""
         mbid = release_data['id']
-        key = self._encode_key(artist, title, disambiguation)
+        key = self._encode_key(params)
         value = {
             'id': mbid,
             'last_update': int(time.time()),
