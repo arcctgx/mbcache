@@ -42,9 +42,38 @@ class _Cache:
     def __repr__(self):
         return json.dumps(self.cache, indent=1)
 
+    def _find_mbid_in_index(self, params):
+        key = self._encode_key(params)
+        try:
+            entry = self.cache[key]
+            entry['last_lookup'] = int(time.time())
+            self.update_required = True
+            return entry['id']
+        except KeyError:
+            return None
+
+    def _store_mbid_in_index(self, mbid, params):
+        entry = {
+            'id': mbid,
+            'last_update': int(time.time()),
+            'last_lookup': None,
+        }
+
+        key = self._encode_key(params)
+        self.cache[key] = entry
+        self.update_required = True
+
     @staticmethod
     def _encode_key(_params):
         """Convert entity parameters to a cache key string."""
+        raise NotImplementedError
+
+    def lookup(self, _params):
+        """Retrieve entity data from the cache."""
+        raise NotImplementedError
+
+    def store(self, _data, _params):
+        """Store entity data in the cache."""
         raise NotImplementedError
 
 
@@ -69,21 +98,11 @@ class _RecordingCache(_Cache):
 
     def lookup(self, params):
         """Look up a recording MBID by artist, title and album."""
-        key = self._encode_key(params)
-        try:
-            entry = self.cache[key]
-            entry['last_lookup'] = int(time.time())
-            self.update_required = True
-            return entry['id']
-        except KeyError:
-            return None
+        return self._find_mbid_in_index(params)
 
     def store(self, mbid, params):
         """Store a recording MBID in cache."""
-        key = self._encode_key(params)
-        value = {'id': mbid, 'last_update': int(time.time()), 'last_lookup': None}
-        self.cache[key] = value
-        self.update_required = True
+        self._store_mbid_in_index(mbid, params)
 
 
 class _ReleaseCache(_Cache):
@@ -131,6 +150,15 @@ class _ReleaseCache(_Cache):
         if num_orphans > 0:
             print('Removed', num_orphans, 'orphaned cache files.')
 
+    def _load_release_data(self, mbid):
+        release_file = os.path.join(self.cache_dir, mbid + '.json')
+
+        try:
+            with open(release_file, encoding='utf-8') as rel:
+                return json.load(rel)
+        except FileNotFoundError:
+            return None
+
     @staticmethod
     def _encode_key(params):
         if params['disambiguation'] is None:
@@ -143,22 +171,11 @@ class _ReleaseCache(_Cache):
         Look up release data by artist, title
         and optional disambiguation string.
         """
-        key = self._encode_key(params)
-        try:
-            entry = self.cache[key]
-            entry['last_lookup'] = int(time.time())
-            self.update_required = True
-        except KeyError:
+        mbid = self._find_mbid_in_index(params)
+        if mbid is None:
             return None
 
-        mbid = entry['id']
-        release_file = os.path.join(self.cache_dir, mbid + '.json')
-
-        try:
-            with open(release_file, encoding='utf-8') as rel:
-                return json.load(rel)
-        except FileNotFoundError:
-            return None
+        return self._load_release_data(mbid)
 
     def lookup_id(self, mbid):
         """Look up release information by MBID."""
@@ -171,26 +188,15 @@ class _ReleaseCache(_Cache):
         self.cache[mbid_key]['last_lookup'] = int(time.time())
         self.update_required = True
 
-        release_file = os.path.join(self.cache_dir, mbid + '.json')
-
-        try:
-            with open(release_file, encoding='utf-8') as rel:
-                return json.load(rel)
-        except FileNotFoundError:
-            return None
+        return self._load_release_data(mbid)
 
     def store(self, release_data, params):
         """Store release data in cache, with optional disambiguation string."""
         mbid = release_data['id']
+        self._store_mbid_in_index(mbid, params)
+
         key = self._encode_key(params)
-        value = {
-            'id': mbid,
-            'last_update': int(time.time()),
-            'last_lookup': None,
-            'permanent': False
-        }
-        self.cache[key] = value
-        self.update_required = True
+        self.cache[key]['permanent'] = False
 
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 
