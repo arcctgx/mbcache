@@ -16,7 +16,15 @@ from mbcache.version import APPNAME, URL, VERSION
 
 
 # pylint: disable=too-few-public-methods
-class MbRecordingCache:
+class _MbCache:
+    """Base class for entity-specific high-level cache objects."""
+
+    def __init__(self):
+        musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
+
+
+# pylint: disable=too-few-public-methods
+class MbRecordingCache(_MbCache):
     """
     High-level cache object for MusicBrainz recording MBIDs. Manages searching
     for recording MBIDs in MusicBrainz, presenting search results to the user,
@@ -25,7 +33,7 @@ class MbRecordingCache:
 
     def __init__(self, application=APPNAME, cache_name='recordings'):
         self._cache = _RecordingCache(application, cache_name)
-        musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
+        super().__init__()
 
     @staticmethod
     def _print_search_results(recordings):
@@ -108,7 +116,7 @@ class MbRecordingCache:
         return mbid
 
 
-class MbReleaseCache:
+class MbReleaseCache(_MbCache):
     """
     High-level cache object for MusicBrainz releases. Manages searching for
     releases in MusicBrainz, presenting search results to the user, storing
@@ -118,7 +126,7 @@ class MbReleaseCache:
 
     def __init__(self, application=APPNAME, cache_name='releases'):
         self._cache = _ReleaseCache(application, cache_name)
-        musicbrainzngs.set_useragent(APPNAME, VERSION, URL)
+        super().__init__()
 
     @staticmethod
     def _print_search_results(releases):
