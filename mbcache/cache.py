@@ -5,7 +5,6 @@ import json
 import os
 import time
 
-from mbnames import normalize
 from xdg import BaseDirectory
 
 from mbcache.lock import _Lock
@@ -43,9 +42,8 @@ class _Cache:
         return json.dumps(self.cache, indent=1)
 
     def _find_mbid_in_index(self, params):
-        key = self._encode_key(params)
         try:
-            entry = self.cache[key]
+            entry = self.cache[params.key()]
             entry['last_lookup'] = int(time.time())
             self.update_required = True
             return entry['id']
@@ -59,14 +57,8 @@ class _Cache:
             'last_lookup': None,
         }
 
-        key = self._encode_key(params)
-        self.cache[key] = entry
+        self.cache[params.key()] = entry
         self.update_required = True
-
-    @staticmethod
-    def _encode_key(_params):
-        """Convert entity parameters to a cache key string."""
-        raise NotImplementedError
 
     def lookup(self, _params):
         """Retrieve entity data from the cache."""
@@ -91,10 +83,6 @@ class _RecordingCache(_Cache):
 
     Cache stores times of last update and last lookup as UNIX timestamps.
     """
-
-    @staticmethod
-    def _encode_key(params):
-        return normalize('\t'.join((params['artist'], params['album'], params['title'])))
 
     def lookup(self, params):
         """Look up a recording MBID by artist, title and album."""
@@ -159,13 +147,6 @@ class _ReleaseCache(_Cache):
         except FileNotFoundError:
             return None
 
-    @staticmethod
-    def _encode_key(params):
-        if params['disambiguation'] is None:
-            return normalize('\t'.join((params['artist'], params['title'])))
-
-        return normalize('\t'.join((params['artist'], params['title'], params['disambiguation'])))
-
     def lookup(self, params):
         """
         Look up release data by artist, title
@@ -194,9 +175,7 @@ class _ReleaseCache(_Cache):
         """Store release data in cache, with optional disambiguation string."""
         mbid = release_data['id']
         self._store_mbid_in_index(mbid, params)
-
-        key = self._encode_key(params)
-        self.cache[key]['permanent'] = False
+        self.cache[params.key()]['permanent'] = False
 
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 

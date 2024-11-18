@@ -12,6 +12,7 @@ user to ensure thread-level synchronization.
 import musicbrainzngs
 
 from mbcache.cache import _RecordingCache, _ReleaseCache
+from mbcache.params import _RecordingParams, _ReleaseParams
 from mbcache.version import APPNAME, URL, VERSION
 
 
@@ -105,11 +106,7 @@ class MbRecordingCache(_MbCache):
         If the search result is ambiguous, present the choices to the user
         and ask them to select the best-matching recording.
         """
-        params = {
-            'artist': artist,
-            'title': title,
-            'album': album,
-        }
+        params = _RecordingParams(artist, title, album)
 
         mbid = self._cache.lookup(params)
         if mbid is not None:
@@ -248,11 +245,7 @@ class MbReleaseCache(_MbCache):
         future use. If the search result is ambiguous, present the choices to
         the user and ask them to select the best-matching release.
         """
-        params = {
-            'artist': artist,
-            'title': title,
-            'disambiguation': disambiguation,
-        }
+        params = _ReleaseParams(artist, title, disambiguation)
 
         release = self._cache.lookup(params)
         if release is not None:
@@ -279,11 +272,8 @@ class MbReleaseCache(_MbCache):
 
         release = self._lookup_in_musicbrainz(mbid)
         if release is not None:
-            params = {
-                'artist': release['artist-credit-phrase'],
-                'title': release['title'],
-                'disambiguation': disambiguation,
-            }
+            params = _ReleaseParams(release['artist-credit-phrase'], release['title'],
+                                    disambiguation)
             self._cache.store(release, params)
 
         return release
