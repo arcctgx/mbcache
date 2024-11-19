@@ -9,6 +9,8 @@ not by multiple threads within one process. It is the responsibility of the
 user to ensure thread-level synchronization.
 """
 
+from typing import Dict, Optional
+
 import musicbrainzngs
 
 from mbcache.cache import _RecordingCache, _ReleaseCache
@@ -32,12 +34,12 @@ class MbRecordingCache(_MbCache):
     storing results in the low-level cache, and retrieving them as needed.
     """
 
-    def __init__(self, application=APPNAME, cache_name='recordings'):
+    def __init__(self, application: str = APPNAME, cache_name: str = 'recordings'):
         self._cache = _RecordingCache(application, cache_name)
         super().__init__()
 
     @staticmethod
-    def _print_search_results(recordings):
+    def _print_search_results(recordings: Dict) -> None:
         count = recordings['recording-count']
 
         if count == 0:
@@ -67,7 +69,7 @@ class MbRecordingCache(_MbCache):
                   (idx + 1, score, albums, isrcs, artist, title, disambiguation))
 
     @staticmethod
-    def _select_from_search_results(recordings):
+    def _select_from_search_results(recordings: Dict) -> Optional[str]:
         count = recordings['recording-count']
 
         if count == 1:
@@ -84,7 +86,7 @@ class MbRecordingCache(_MbCache):
                 return recordings['recording-list'][index - 1]['id']
 
     @staticmethod
-    def _search_in_musicbrainz(artist, title, album):
+    def _search_in_musicbrainz(artist: str, title: str, album: str) -> Optional[str]:
         recordings = musicbrainzngs.search_recordings(artist=artist,
                                                       recordingaccent=title,
                                                       release=album,
@@ -98,7 +100,7 @@ class MbRecordingCache(_MbCache):
 
         return MbRecordingCache._select_from_search_results(recordings)
 
-    def get(self, artist, title, album):
+    def get(self, artist: str, title: str, album: str) -> Optional[str]:
         """
         Retrieve a recording from the cache using the specified artist, title,
         and album information. If the recording is not found in the cache,
@@ -127,12 +129,12 @@ class MbReleaseCache(_MbCache):
     title, or by release MBID.
     """
 
-    def __init__(self, application=APPNAME, cache_name='releases'):
+    def __init__(self, application: str = APPNAME, cache_name: str = 'releases'):
         self._cache = _ReleaseCache(application, cache_name)
         super().__init__()
 
     @staticmethod
-    def _print_search_results(releases):
+    def _print_search_results(releases: Dict) -> None:
         count = releases['release-count']
 
         if count == 0:
@@ -185,7 +187,7 @@ class MbReleaseCache(_MbCache):
                   (idx + 1, score, artist, title, ', '.join(not_empty), disambiguation))
 
     @staticmethod
-    def _select_from_search_results(releases):
+    def _select_from_search_results(releases: Dict) -> Optional[Dict]:
         count = releases['release-count']
 
         if count == 1:
@@ -202,7 +204,7 @@ class MbReleaseCache(_MbCache):
                 return releases['release-list'][index - 1]
 
     @staticmethod
-    def _search_in_musicbrainz(artist, title):
+    def _search_in_musicbrainz(artist: str, title: str) -> Optional[Dict]:
         releases = musicbrainzngs.search_releases(artist=artist, releaseaccent=title, strict=True)
         MbReleaseCache._print_search_results(releases)
 
@@ -223,7 +225,7 @@ class MbReleaseCache(_MbCache):
             return None
 
     @staticmethod
-    def _lookup_in_musicbrainz(album_mbid):
+    def _lookup_in_musicbrainz(album_mbid: str) -> Optional[Dict]:
         try:
             result = musicbrainzngs.get_release_by_id(
                 album_mbid, includes=['artists', 'recordings', 'artist-credits'])
@@ -237,7 +239,7 @@ class MbReleaseCache(_MbCache):
             print(f'Query for MBID {album_mbid} returned empty result!')
             return None
 
-    def get(self, artist, title, disambiguation=None):
+    def get(self, artist: str, title: str, disambiguation: Optional[str] = None) -> Optional[Dict]:
         """
         Retrieve a release from the cache using the specified artist, title,
         and an optional disambiguation string. If the release is not found in
@@ -257,7 +259,7 @@ class MbReleaseCache(_MbCache):
 
         return release
 
-    def get_mbid(self, mbid, disambiguation=None):
+    def get_mbid(self, mbid: str, disambiguation: Optional[str] = None) -> Optional[Dict]:
         """
         Retrieve a release from the cache using the specified release MBID. If
         the release is not found, look it up in MusicBrainz using the MBID and

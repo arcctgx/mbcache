@@ -4,17 +4,21 @@ import glob
 import json
 import os
 import time
+from typing import Dict, Optional, Union
 
 from xdg import BaseDirectory
 
 from mbcache.lock import _Lock
+from mbcache.params import _EntityParams
+
+_EntityData = Union[str, Dict]
 
 
 class _Cache:
     """Base class for entity-specific MusicBrainz caches."""
 
-    def __init__(self, application, cache_name):
-        self.cache = None
+    def __init__(self, application: str, cache_name: str):
+        self.cache: Optional[dict] = None
         self.update_required = False
         self.cache_dir = BaseDirectory.save_cache_path(application, cache_name)
         self.index_path = os.path.join(self.cache_dir, 'index.json')
@@ -41,7 +45,9 @@ class _Cache:
     def __repr__(self):
         return json.dumps(self.cache, indent=1)
 
-    def _find_mbid_in_index(self, params):
+    def _find_mbid_in_index(self, params: _EntityParams) -> Optional[str]:
+        assert self.cache is not None, 'cache is None'
+
         try:
             entry = self.cache[params.key()]
             entry['last_lookup'] = int(time.time())
@@ -50,7 +56,9 @@ class _Cache:
         except KeyError:
             return None
 
-    def _store_mbid_in_index(self, mbid, params):
+    def _store_mbid_in_index(self, mbid: str, params: _EntityParams) -> None:
+        assert self.cache is not None, 'cache is None'
+
         entry = {
             'id': mbid,
             'last_update': int(time.time()),
@@ -60,11 +68,11 @@ class _Cache:
         self.cache[params.key()] = entry
         self.update_required = True
 
-    def lookup(self, _params):
+    def lookup(self, _params: _EntityParams) -> Optional[_EntityData]:
         """Retrieve entity data from the cache."""
         raise NotImplementedError
 
-    def store(self, _data, _params):
+    def store(self, _data: _EntityData, _params: _EntityParams) -> None:
         """Store entity data in the cache."""
         raise NotImplementedError
 
@@ -84,12 +92,13 @@ class _RecordingCache(_Cache):
     Cache stores times of last update and last lookup as UNIX timestamps.
     """
 
-    def lookup(self, params):
+    def lookup(self, params: _EntityParams) -> Optional[str]:
         """Look up a recording MBID by artist, title and album."""
         return self._find_mbid_in_index(params)
 
-    def store(self, mbid, params):
+    def store(self, mbid: _EntityData, params: _EntityParams) -> None:
         """Store a recording MBID in cache."""
+        assert isinstance(mbid, str), 'mbid is not a str'
         self._store_mbid_in_index(mbid, params)
 
 
@@ -122,7 +131,9 @@ class _ReleaseCache(_Cache):
             self._remove_orphans()
         super().__del__()
 
-    def _remove_orphans(self):
+    def _remove_orphans(self) -> None:
+        assert self.cache is not None, 'cache is None'
+
         in_cache = set(
             glob.glob(os.path.join(self.cache_dir, '????????-????-????-????-????????????.json')))
         in_index = {
@@ -138,7 +149,7 @@ class _ReleaseCache(_Cache):
         if num_orphans > 0:
             print('Removed', num_orphans, 'orphaned cache files.')
 
-    def _load_release_data(self, mbid):
+    def _load_release_data(self, mbid: str) -> Optional[Dict]:
         release_file = os.path.join(self.cache_dir, mbid + '.json')
 
         try:
@@ -147,7 +158,7 @@ class _ReleaseCache(_Cache):
         except FileNotFoundError:
             return None
 
-    def lookup(self, params):
+    def lookup(self, params: _EntityParams) -> Optional[Dict]:
         """
         Look up release data by artist, title
         and optional disambiguation string.
@@ -158,8 +169,10 @@ class _ReleaseCache(_Cache):
 
         return self._load_release_data(mbid)
 
-    def lookup_id(self, mbid):
+    def lookup_id(self, mbid: str) -> Optional[Dict]:
         """Look up release information by MBID."""
+        assert self.cache is not None, 'cache is None'
+
         index_mbids = [entry['id'] for entry in self.cache.values()]
         if mbid not in index_mbids:
             return None
@@ -171,8 +184,11 @@ class _ReleaseCache(_Cache):
 
         return self._load_release_data(mbid)
 
-    def store(self, release_data, params):
+    def store(self, release_data: _EntityData, params: _EntityParams) -> None:
         """Store release data in cache, with optional disambiguation string."""
+        assert self.cache is not None, 'cache is None'
+        assert isinstance(release_data, dict), 'release_data is not a dict'
+
         mbid = release_data['id']
         self._store_mbid_in_index(mbid, params)
         self.cache[params.key()]['permanent'] = False
