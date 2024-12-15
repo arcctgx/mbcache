@@ -26,7 +26,7 @@ Homepage = "https://github.com/arcctgx/mbcache"
 version = { attr = "mbcache.version.VERSION" }
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 
 [[tool.mypy.overrides]]
 module = ["mbnames", "musicbrainzngs"]
