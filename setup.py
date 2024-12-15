@@ -21,6 +21,7 @@ setup(name=APPNAME,
           'console_scripts': [
               'mb-release-lookup = mbcache.release_lookup:main',
               'mb-release-search = mbcache.release_search:main',
-              'mb-recording-search = mbcache.recording_search:main'
+              'mb-recording-search = mbcache.recording_search:main',
+              'mb-copy-recordings = mbcache.copy_recordings:main'
           ]
       })
