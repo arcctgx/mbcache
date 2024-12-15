@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mbcache"
+dynamic = ["version"]
+dependencies = ["mbnames", "musicbrainzngs", "pyxdg"]
+
+authors = [{ name = "arcctgx", email = "arcctgx@o2.pl" }]
+
+description = "A simple cache for MusicBrainz data."
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "GPLv3" }
+
+[project.scripts]
+mb-copy-recordings = "mbcache.copy_recordings:main"
+mb-recording-search = "mbcache.recording_search:main"
+mb-release-lookup = "mbcache.release_lookup:main"
+mb-release-search = "mbcache.release_search:main"
+
+[project.urls]
+Homepage = "https://github.com/arcctgx/mbcache"
+
+[tool.setuptools.dynamic]
+version = { attr = "mbcache.version.VERSION" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[[tool.mypy.overrides]]
+module = ["mbnames", "musicbrainzngs"]
+ignore_missing_imports = true
+
+[tool.pylint.basic]
+no-docstring-rgx = "^(_|main$)"
+
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 100
