@@ -68,6 +68,11 @@ class _Cache:
         self.cache[params.key()] = entry
         self.update_required = True
 
+    def exists(self, params: _EntityParams) -> bool:
+        """Check if specified entry exists in the cache."""
+        assert self.cache is not None, 'cache is None'
+        return params.key() in self.cache.keys()
+
     def lookup(self, _params: _EntityParams) -> Optional[_EntityData]:
         """Retrieve entity data from the cache."""
         raise NotImplementedError
