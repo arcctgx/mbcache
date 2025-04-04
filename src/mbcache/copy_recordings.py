@@ -62,10 +62,10 @@ def _make_tracklist(release: Dict,
 
             artist = track['artist-credit-phrase']
             if len(track['artist-credit']) == 1:
-                # use canonical names on non-compaunt artists by default
+                # use canonical names on non-compound artists by default
                 artist = track['artist-credit'][0]['artist']['name']
 
-            artist = remove_featured(artist, feat_string)  # type: ignore
+            artist = remove_featured(artist, feat_string)
 
             mbid = track['recording']['id']
             params = _RecordingParams(artist, title, album)
