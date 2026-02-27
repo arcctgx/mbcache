@@ -1,6 +1,7 @@
 """Find MusicBrainz release based on artist and title."""
 
 import argparse
+import json
 
 from mbcache import MbReleaseCache
 from mbcache.version import VERSION
@@ -29,7 +30,7 @@ def main():
     release = cache.get(args.artist, args.title, args.disambiguation)
 
     if release is not None:
-        print(release)
+        print(json.dumps(release, indent=1))
 
 
 if __name__ == '__main__':
